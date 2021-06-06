@@ -6,7 +6,6 @@ import os
 
 def compare_and_display(image_received, encode_list, names):
 
-
     face_detected = True
     # Resizing the image for processing purposes
     img = image_received
@@ -18,8 +17,10 @@ def compare_and_display(image_received, encode_list, names):
     encodes_in_frame = face_recognition.face_encodings(img_resized, faces_in_frame)
     # Comparing the given image with the list of images
     try:
-        matches = face_recognition.compare_faces(encode_list, encodes_in_frame[0])
+        matches = face_recognition.compare_faces(encode_list, encodes_in_frame[0], tolerance=0.5)
+        print(matches)
         face_dis = face_recognition.face_distance(encode_list, encodes_in_frame[0])
+        print(face_dis)
     except IndexError:
         print("Face not found")
         face_detected = False
@@ -31,19 +32,18 @@ def compare_and_display(image_received, encode_list, names):
     else:
         # Getting the index of the image from the image list which best matches the input image
         match_index = np.argmin(face_dis)
+        print(match_index)
         # placing a rectangular box on the detected face and displaying the name of the individual
-        if matches[match_index] and face_dis[match_index] < 0.4:
+        if matches[match_index]:
             name = names[match_index].upper()
             face = face_cascade.detectMultiScale(img, scaleFactor=1.5, minNeighbors=5)
             for x, y, w, h in face:
                 img = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 3)
                 cv2.putText(img, name, (x+6, y+6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-        print(name)
+        else:
+            name = input("New face detected, enter name: ")
         cv2.imshow("webcam", img)
+        print(name)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         return face_detected, name
-
-
-
-

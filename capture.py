@@ -3,6 +3,18 @@ import os
 from compare import *
 import cv2
 
+face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+
+def save_in_others(img):
+    if 'OTHERS' not in os.listdir(os.getcwd()):
+        os.mkdir(os.getcwd() + '\\' + 'OTHERS')
+        path = os.getcwd() + '\\' + 'OTHERS'
+        cv2.imwrite(path + '\\OTHERS1.jpg', img)
+    else:
+        cv2.imwrite(os.getcwd() + '\\OTHERS\\OTHERS' + str(len(os.listdir(os.getcwd() + '\\OTHERS')) + 1) + '.jpg', img)
+
+
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 check, frame = camera.read()
@@ -12,10 +24,15 @@ names = []
 if len(recognized_faces) == 0:
     cv2.imshow('img', frame)
     cv2.waitKey(0)
-    name = input("New face detected, enter name: ").upper()
-    os.mkdir(os.getcwd() + '\\images\\' + name.upper())
-    path = os.getcwd() + '\\images\\' + name + '\\' + name + '1'
-    cv2.imwrite(path + '.jpg', frame)
+    face = face_cascade.detectMultiScale(frame, scaleFactor=1.5, minNeighbors=5)
+    print(face)
+    if len(face) == 0:
+        save_in_others(frame)
+    else:
+        name = input("New face detected, enter name: ").upper()
+        os.mkdir(os.getcwd() + '\\images\\' + name.upper())
+        path = os.getcwd() + '\\images\\' + name + '\\' + name + '1'
+        cv2.imwrite(path + '.jpg', frame)
 # Retrieving images and their name from the given path
 else:
     for faces in recognized_faces:
@@ -59,18 +76,12 @@ else:
                     pass
                 else:
                     print("adding to others")
+                    save_in_others(frame)
                     break
             else:
-                print("adding to others")
+                print('adding in others')
+                save_in_others(frame)
                 break
-    # gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # face = face_cascade.detectMultiScale(gray_image, scaleFactor=1.5, minNeighbors=5)
-    # for x, y, w, h in face:
-    #     gray_image = cv2.rectangle(gray_image, (x, y), (x+w, y+h), (0, 255, 0), 3)
 
-    # cv2.imshow("image", gray_image)
-    # key = cv2.waitKey(1)
-    #
-    # if key == ord('q'):
-    #     break
 camera.release()
+
